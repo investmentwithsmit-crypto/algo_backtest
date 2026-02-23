@@ -8,7 +8,7 @@ from typing import Callable
 # ────────────────────────────────────────────────
 # Date Parser
 # ────────────────────────────────────────────────
-def parse_date(date_str: str) → datetime.datetime:
+def parse_date(date_str: str) -> datetime.datetime:
     # Example: "Mon Feb 09 2026 09:15:00 GMT+0530 (India Standard Time)"
     try:
         if '(' in date_str:
@@ -31,6 +31,8 @@ def ema(series: pd.Series, length: int) -> pd.Series:
 def wma(series: pd.Series, length: int) -> pd.Series:
     weights = np.arange(1, length + 1)
     return series.rolling(length).apply(lambda x: np.dot(x, weights) / weights.sum(), raw=True)
+
+# ... rest of the functions with -> instead of →
 
 def hullma(series: pd.Series, length: int) -> pd.Series:
     wma_half = wma(series, length // 2)
