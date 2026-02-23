@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import ta.momentum as ta_momentum  # pip install ta-lib or use pandas-ta
 import matplotlib.pyplot as plt
+import re
 
 # Tilson T3 function (from Pine Script)
 def tilson_t3(series, length, factor=0.7):
@@ -127,7 +128,18 @@ uploaded_file = st.file_uploader("Upload Nifty CSV (Date, Open, High, Low, Close
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    df['Date'] = pd.to_datetime(df['Date'])
+
+    # Custom date parser
+    def parse_custom_date(s):
+        s_clean = re.sub(r'\s*\(India Standard Time\)', '', s).strip()
+        dt = pd.to_datetime(s_clean, utc=True, errors='coerce')
+        if pd.isna(dt):
+            st.error(f"Invalid date format: {s}")
+            return pd.NaT
+        return dt.tz_convert('Asia/Kolkata') if dt.tzinfo else dt
+
+    df['Date'] = df['Date'].apply(parse_custom_date)
+    df = df.dropna(subset=['Date'])  # Drop invalid dates
 
     ma_type = st.selectbox("MA Type", ["SMA", "EMA", "WMA", "HullMA", "VWMA", "RMA", "TEMA", "Tilson T3"])
     ma_length = st.number_input("MA Length", value=20, min_value=1)
